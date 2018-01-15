@@ -1,0 +1,7 @@
+.bootstrap-typeahead .dropdown-menu {
+    z-index: 2000;
+}
+
+.bootstrap-typeahead .dropdown-menu-justify {
+    z-index: 2000;
+}

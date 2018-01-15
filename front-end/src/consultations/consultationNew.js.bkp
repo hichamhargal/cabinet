@@ -1,0 +1,363 @@
+// import backToJsonArray from '../functions/jsonArray.js';
+var React = require('react');
+var createReactClass = require('create-react-class');
+var DateTime = require('react-datetime');
+var Moment = require('moment');
+var Typeahead = require('react-bootstrap-typeahead').Typeahead;
+var axios = require('axios');
+var listMaladeName = require('../config/MaladeHttpRequests').listMaladeName;
+var listSymptome = require('../config/ConsultationHttpRequests').listSymptome;
+
+
+
+
+function backToJsonArray(oldArray,currentArray,id)
+{
+    var newArray= [];
+    newArray = currentArray;
+    var index;
+    var element;
+    //get position from oldArray
+    for(var i=0 ; i<oldArray.length;i++)
+    {
+        var temp = oldArray[i];
+        if(temp.id === id)
+        {
+            element =temp;
+            index=i;
+            break;
+        }
+    }
+    newArray.splice(index,0,element);
+    return newArray;
+}
+
+const display = {
+    display: 'block',
+    backgroundColor: "absolute",
+    //backgroundColor: "#ffffff",
+    // top: "0%",
+    // left: "40%"
+};
+const hide = {
+    display: 'none',
+    height: (window.innerHeight -200) +"px",
+    width: "100%",
+    overflowY: "scroll"
+};
+var modal_content_style = {
+    height: (window.innerHeight -200) +"px",
+    width: "100%",
+    overflowY: "scroll"
+};
+var ConsultationNew = createReactClass({
+    getInitialState: function() {
+        return {
+            MaladeDataTypeAhead: [],
+            SymptomeDataTypeAhead: [],
+            ShownSymptomeDataTypeAhead: [],
+            progress: true,
+            serverError: false,
+            SelectedMalade: null,
+            lastSelectedSymptome: null,
+            SelectedSymptomes: [],
+            listRenderSymptomes: [],
+        };
+    },
+    componentDidMount: function() {
+        var _this = this;
+        const config = {
+            onDownloadProgress: _this.onProgress,
+        };
+        axios.all([this.getMaladeNames(),this.getSymptomes()],config)
+            .then(axios.spread(function (maladesAjax,symptomesAjax) {
+                const maladeNames = maladesAjax.data;
+                const symptomes = symptomesAjax.data;
+                var dataMalades = [];
+                var dataSymptomes = [];
+                for (var i=0; i<maladeNames.length; i++)
+                {
+                    dataMalades.push({id: maladeNames[i].id, fullName: maladeNames[i].firstName +' '+ maladeNames[i].lastName});
+                }
+                for (i=0; i<symptomes.length; i++)
+                {
+                    dataSymptomes.push({id: symptomes[i].id, description: symptomes[i].description});
+                }
+                _this.setState({
+                    MaladeDataTypeAhead: dataMalades,
+                    SymptomeDataTypeAhead: dataSymptomes,
+                    ShownSymptomeDataTypeAhead: dataSymptomes,
+                    progress: false,
+                    serverError: false,
+                });
+            }))
+            .catch(function(error){
+                _this.setState({
+                    MaladeDataTypeAhead: [],
+                    SymptomeDataTypeAhead: [],
+                    ShownSymptomeDataTypeAhead: [],
+                    progress: false,
+                    serverError: true,
+                });
+            });
+    },
+    resetSelection() {
+        const SymptomeDataTypeAhead = this.state.SymptomeDataTypeAhead;
+        this.setState({
+            SelectedMalade: null,
+            SelectedSymptomes: [],
+            ShownSymptomeDataTypeAhead: SymptomeDataTypeAhead,
+            listRenderSymptomes: [],
+            lastSelectedSymptome: null
+        });
+        return this.props.hideModal();
+    },
+    getMaladeNames: function(){
+        return axios.get(listMaladeName);
+    },
+    getSymptomes: function(){
+        return axios.get(listSymptome);
+    },
+    onProgress: function(){
+        this.setState({
+            progress: true
+        });
+    },
+    handleChangeTypeAhead: function(selectedItems) {
+        if(selectedItems.length < 1)
+            return null;
+        var selectedItem = selectedItems[0];
+        this.setState({
+            SelectedMalade: selectedItem.id
+        });
+        return true;
+    },
+    handleChangeTypeAheadSymptomes: function(selectedItems) {
+        var selected = null;
+        if(selectedItems.length >= 1)
+        {
+            selected =selectedItems[0];
+        }
+        this.setState({
+            lastSelectedSymptome: selected
+        });
+        return selected;
+    },
+    handleUnselectSymptome: function(selectedItem) {
+
+        // unfinished
+
+        //all previously selected symptomes
+        var OldselectedSymptomes = this.state.SelectedSymptomes;
+        var NewSelectedSymptomes = [];
+        var ShownSymptomeDataTypeAhead = this.state.ShownSymptomeDataTypeAhead;
+        var SymptomeDataTypeAhead = this.state.SymptomeDataTypeAhead;
+        var newShownSymptomeDataTypeAhead = backToJsonArray(SymptomeDataTypeAhead,ShownSymptomeDataTypeAhead,selectedItem);
+        for(var i=0 ; i<OldselectedSymptomes.length;i++)
+        {
+            var symp = OldselectedSymptomes[i];
+            if(symp.id !== selectedItem)
+            {
+                NewSelectedSymptomes.push({id: symp.id, description: symp.description })
+            }
+        }
+        var renderList = this.renderListSymptomes(NewSelectedSymptomes);
+        this.setState({
+            ShownSymptomeDataTypeAhead:newShownSymptomeDataTypeAhead,
+            SelectedSymptomes: NewSelectedSymptomes,
+            listRenderSymptomes: renderList,
+        });
+
+        return true;
+    },
+    handleSymptomeClick: function(e) {
+        e.preventDefault();
+        if(this.state.lastSelectedSymptome == null)
+            return false;
+        //item selected in the typeahead
+        var selectedItem = this.state.lastSelectedSymptome;
+
+        //all previously selected symptomes
+        var selectedSymptomes = this.state.SelectedSymptomes;
+
+        //list of remaining unselected symptomes before this last selection
+        var OldShownSymptomeDataTypeAhead = this.state.ShownSymptomeDataTypeAhead;
+
+        //new list of remaining unselected symptomes
+        var ShownSymptomeDataTypeAhead= [];
+        for(var i=0 ; i<OldShownSymptomeDataTypeAhead.length;i++)
+        {
+            var symp = OldShownSymptomeDataTypeAhead[i];
+            if(symp.id !== selectedItem.id)
+            {
+                ShownSymptomeDataTypeAhead.push({id: symp.id, description: symp.description })
+            }
+        }
+        selectedSymptomes.push(selectedItem);
+        var renderList = this.renderListSymptomes(selectedSymptomes);
+        this.setState({
+            SelectedSymptomes: selectedSymptomes,
+            ShownSymptomeDataTypeAhead: ShownSymptomeDataTypeAhead,
+            listRenderSymptomes: renderList,
+            lastSelectedSymptome: null
+        });
+        this.refs.typeahead.getInstance().clear();
+        return true;
+    },
+    renderListSymptomes: function(listSymptomes) {
+        var renderList= [];
+        var item;
+        var _this=this;
+        listSymptomes.forEach(function(symp){
+            item = (
+                <li key={symp.id} className="list-group-item">
+                    <span className="badge" onClick={_this.handleUnselectSymptome.bind(_this,symp.id)}><i className="fa fa-times" aria-hidden="true"></i></span>
+                    {symp.description}
+                </li>
+            );
+            renderList.push(item);
+        });
+        return renderList;
+    },
+    render: function(){
+        if(!this.props.show)
+        {
+            return null;
+        }
+        var symptomeButtonActive = this.state.lastSelectedSymptome == null ? "btn btn-default disabled" : "btn btn-default";
+        var symptomePanelActive = this.state.SelectedSymptomes.length < 1 ? "panel panel-primary hidden" : "panel panel-primary"
+        return (
+            <div className="modal" id="consultationViewerModal" style={this.props.show ? display : hide} aria-hidden="true">
+                <div className="modal-dialog" role="document" >
+                    <div className="modal-content" >
+                        <div className="modal-header">
+                            <h5 className="modal-title">Nouvelle Consultation</h5>
+                            <button type="button" className="close" aria-label="Close" onClick={this.resetSelection}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body"  style={modal_content_style}>
+
+                            <form className="form-horizontal" role="form">
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Date de Consultation</label>
+                                    <div className="col-sm-10">
+                                        <DateTime
+                                            viewMode="years"
+                                            dateFormat="DD/MM/YYYY"
+                                            timeFormat={false}
+                                            closeOnSelect={true}
+                                            defaultValue={Moment.now()}
+                                            closeOnTab={true}
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Malade</label>
+                                    <div className="col-sm-10">
+                                        <Typeahead
+                                            onChange={this.handleChangeTypeAhead}
+                                            options={this.state.MaladeDataTypeAhead}
+                                            placeholder="Cliquer ou Entrez le nom/prenom du malade"
+                                            labelKey="fullName"
+                                            multiple={false}
+                                            bsSize="medium"
+                                            defaultSelected={this.state.selectedMalade}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Symptomes</label>
+                                    <div className="col-sm-10">
+                                    <div className="input-group">
+                                            <Typeahead
+                                                ref="typeahead"
+                                                onChange={this.handleChangeTypeAheadSymptomes}
+                                                options={this.state.ShownSymptomeDataTypeAhead}
+                                                placeholder="Cliquer ou Entrez un/les symptome(s)"
+                                                labelKey="description"
+                                                multiple={false}
+                                                bsSize="medium"
+                                                submitFormOnEnter={false}
+                                            />
+                                            <span className="input-group-btn">
+                                                <button type="submit" className={symptomeButtonActive} onClick={this.handleSymptomeClick}><i className="fa fa-plus" aria-hidden="true"></i></button>
+                                            </span>
+                                    </div>
+                                    </div>
+                                </div>
+                                <div className={symptomePanelActive}>
+                                    <div className="panel-heading">Symptomes selectionnés</div>
+                                    <div className="panel-body">
+                                        <ul className="list-group">
+                                            {this.state.listRenderSymptomes}
+                                        </ul>
+                                    </div>
+                                </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Adresse</label>
+                                    <div className="col-sm-10">
+                                        <input type="text" className="form-control"
+                                               placeholder="adresse"
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Adresse</label>
+                                    <div className="col-sm-10">
+                                        <input type="text" className="form-control"
+                                               placeholder="adresse"
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Adresse</label>
+                                    <div className="col-sm-10">
+                                        <input type="text" className="form-control"
+                                               placeholder="adresse"
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Adresse</label>
+                                    <div className="col-sm-10">
+                                        <input type="text" className="form-control"
+                                               placeholder="adresse"
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label  className="col-sm-2 control-label">Adresse</label>
+                                    <div className="col-sm-10">
+                                        <input type="text" className="form-control"
+                                               placeholder="adresse"
+                                            // onChange=''
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <div className="col-sm-offset-4 col-sm-4">
+                                        <button type="submit" className="btn btn-primary btn-block" data-dismiss="modal" onClick={this.props.submit}>Valider</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={this.resetSelection}>Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    },
+});
+
+module.exports = ConsultationNew;

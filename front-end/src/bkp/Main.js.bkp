@@ -1,0 +1,157 @@
+/**
+ * Created by MohamedAmine on 2/6/17.
+ */
+
+var React = require('react');
+var Patient = require('./Patient');
+var axios = require('axios');
+var ReactBsTable  = require('react-bootstrap-table');
+var BootstrapTable = ReactBsTable.BootstrapTable;
+var TableHeaderColumn = ReactBsTable.TableHeaderColumn;
+
+var Main = createReactClass({
+        getInitialState: function() {
+            return {
+                malades: []
+            };
+        },
+    componentDidMount: function() {
+            var _this = this;
+            this.serverRequest = axios.get("http://localhost/app1/public/listMalade")
+            .then(function (result) {
+            const malades = result.data.map(function(mal,index,array) {
+                    return {
+                        id: mal.id,
+                        firstName: mal.nom,
+                        lastName: mal.prenom,
+                        gender: mal.sexe,
+                        address: mal.adresse,
+                        birthDate: mal.date_naissance,
+                    };
+                });
+            console.log(malades);
+            _this.setState({ malades: malades });
+          })
+            .catch(function(error){
+                  _this.setState({
+                    malades: [
+                      {
+                          id: 1,
+                          firstName: "Mark",
+                          lastName: "Otto",
+                          gender: "M",
+                          address: "lot chefchaouni, centre de santé palmier, ain sebaa casablanca",
+                          birthDate: "23/3/1970"
+                      },
+                      {
+                          id: 2,
+                          firstName: "Jacob",
+                          lastName: "Thornton",
+                          gender: "M",
+                          address: "22, rue farah, imm h33, agdal, rabat",
+                          birthDate: "14/4/1999"
+                      },
+                      {
+                          id: 3,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "2, avenue 2 mars, casablanca",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 4,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 1",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 5,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 2",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 6,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 3",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 7,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 4",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 8,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 5",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 9,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 6",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 10,
+                          firstName: "Larry",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "adresse 7",
+                          birthDate: "1/5/1981"
+                      },
+                    ]
+                  });
+            });
+    },
+    handleSelect(eventKey) {
+        this.setState({
+            activePage: eventKey
+        });
+    },
+    render: function() {
+        return (
+            <div className="panel panel-default">
+                <div className="panel-heading">Gestion des Malades</div>
+                <div className="panel-body">
+                    <div className="table-responsive">
+                    <table className="table table-hover table-inverse table-list">
+                        <thead className="thead-inverse">
+                        <tr>
+                            <th>#</th>
+                            <th>Nom</th>
+                            <th>Prenom</th>
+                            <th>Sexe</th>
+                            <th>Adresse</th>
+                            <th>Date de Naissance</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {this.state.malades.map(function(col, j) {
+                            return <Patient key={j} instance={col} />;
+                        })}
+
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+module.exports = Main;

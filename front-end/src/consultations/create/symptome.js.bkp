@@ -1,0 +1,141 @@
+import { backToJsonArray } from '../../functions/jsonArray.js';
+var React = require('react');
+var createReactClass = require('create-react-class');
+var Typeahead = require('react-bootstrap-typeahead').Typeahead;
+
+
+var Symptome = createReactClass({
+    getInitialState: function() {
+        return {
+            ShownSymptomeDataTypeAhead: [],
+            lastSelectedSymptome: null,
+            listRenderSymptomes: [],
+        };
+    },
+    componentDidMount: function() {
+        this.setState({
+            ShownSymptomeDataTypeAhead: this.props.SymptomeDataTypeAhead,
+        });
+    },
+    handleChangeTypeAheadSymptomes: function(selectedItems) {
+        var selected = null;
+        if(selectedItems.length >= 1)
+        {
+            selected =selectedItems[0];
+        }
+        this.setState({
+            lastSelectedSymptome: selected
+        });
+        return selected;
+    },
+    handleUnselectSymptome: function(selectedItem) {
+        //all previously selected symptomes
+        var OldselectedSymptomes = this.props.SelectedSymptomes;
+        var NewSelectedSymptomes = [];
+        var ShownSymptomeDataTypeAhead = this.state.ShownSymptomeDataTypeAhead;
+        var SymptomeDataTypeAhead = this.props.SymptomeDataTypeAhead;
+        var newShownSymptomeDataTypeAhead = backToJsonArray(SymptomeDataTypeAhead,ShownSymptomeDataTypeAhead,selectedItem);
+        for(var i=0 ; i<OldselectedSymptomes.length;i++)
+        {
+            var symp = OldselectedSymptomes[i];
+            if(symp.id !== selectedItem)
+            {
+                NewSelectedSymptomes.push({id: symp.id, description: symp.description })
+            }
+        }
+        var renderList = this.renderListSymptomes(NewSelectedSymptomes);
+        this.setState({
+            ShownSymptomeDataTypeAhead:newShownSymptomeDataTypeAhead,
+            listRenderSymptomes: renderList,
+        });
+        this.props.setSelectedSymptomes(NewSelectedSymptomes);
+        return true;
+    },
+    handleSymptomeClick: function(e) {
+        e.preventDefault();
+        if(this.state.lastSelectedSymptome == null)
+            return false;
+        //item selected in the typeahead
+        var selectedItem = this.state.lastSelectedSymptome;
+
+        //all previously selected symptomes
+        var selectedSymptomes = this.props.SelectedSymptomes;
+
+        //list of remaining unselected symptomes before this last selection
+        var OldShownSymptomeDataTypeAhead = this.state.ShownSymptomeDataTypeAhead;
+
+        //new list of remaining unselected symptomes
+        var ShownSymptomeDataTypeAhead= [];
+        for(var i=0 ; i<OldShownSymptomeDataTypeAhead.length;i++)
+        {
+            var symp = OldShownSymptomeDataTypeAhead[i];
+            if(symp.id !== selectedItem.id)
+            {
+                ShownSymptomeDataTypeAhead.push({id: symp.id, description: symp.description })
+            }
+        }
+        selectedSymptomes.push(selectedItem);
+        var renderList = this.renderListSymptomes(selectedSymptomes);
+        this.setState({
+            ShownSymptomeDataTypeAhead: ShownSymptomeDataTypeAhead,
+            listRenderSymptomes: renderList,
+            lastSelectedSymptome: null
+        });
+        this.props.setSelectedSymptomes(selectedSymptomes);
+        this.refs.typeahead.getInstance().clear();
+        return true;
+    },
+    renderListSymptomes: function(listSymptomes) {
+        var renderList= [];
+        var item;
+        var _this=this;
+        listSymptomes.forEach(function(symp){
+            item = (
+                <li key={symp.id} className="list-group-item">
+                    <span className="badge" onClick={_this.handleUnselectSymptome.bind(_this,symp.id)}><i className="fa fa-times" aria-hidden="true"></i></span>
+                    {symp.description}
+                </li>
+            );
+            renderList.push(item);
+        });
+        return renderList;
+    },
+    render: function(){
+        var symptomeButtonActive = this.state.lastSelectedSymptome == null ? "btn btn-default disabled" : "btn btn-default";
+        var symptomePanelActive = this.props.SelectedSymptomes.length < 1 ? "panel panel-primary hidden" : "panel panel-primary"
+        return (
+                                <div>
+                                    <div className="form-group">
+                                        <label  className="col-sm-2 control-label">Symptomes</label>
+                                        <div className="col-sm-10">
+                                            <div className="input-group">
+                                                <Typeahead
+                                                    ref="typeahead"
+                                                    onChange={this.handleChangeTypeAheadSymptomes}
+                                                    options={this.state.ShownSymptomeDataTypeAhead}
+                                                    placeholder="Cliquer ou Entrez un/les symptome(s)"
+                                                    labelKey="description"
+                                                    multiple={false}
+                                                    bsSize="medium"
+                                                    submitFormOnEnter={false}
+                                                />
+                                                <span className="input-group-btn">
+                                                <button type="submit" className={symptomeButtonActive} onClick={this.handleSymptomeClick}><i className="fa fa-plus" aria-hidden="true"></i></button>
+                                            </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={symptomePanelActive}>
+                                        <div className="panel-heading">Symptomes selectionnés</div>
+                                        <div className="panel-body">
+                                            <ul className="list-group">
+                                                {this.state.listRenderSymptomes}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+        );
+    },
+});
+
+module.exports = Symptome;

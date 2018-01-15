@@ -1,0 +1,87 @@
+/**
+ * Created by MohamedAmine on 2/6/17.
+ */
+import './table.css';
+import './panel.css';
+var React = require('react');
+var Patient = require('./Patient');
+var axios = require('axios');
+var MalData = require('./data_malades');
+
+var MaladeContainer = createReactClass({
+    getInitialState: function() {
+        return {
+            malades: []
+        };
+    },
+    componentDidMount: function() {
+        var _this = this;
+        this.serverRequest = axios.get("http://localhost/app1/public/listMalade")
+            .then(function (result) {
+                const malades = result.data.map(function(mal,index,array) {
+                    return {
+                        id: mal.id,
+                        firstName: mal.nom,
+                        lastName: mal.prenom,
+                        gender: mal.sexe,
+                        address: mal.adresse,
+                        birthDate: mal.date_naissance,
+                    };
+                });
+                _this.setState({ malades: malades });
+            })
+            .catch(function(error){
+                _this.setState({
+                    malades: MalData
+                });
+            });
+    },
+    render: function() {
+        var _style = {
+            height: this.props.divHeight+"px"
+        };
+        var table_style = {
+            height: (this.props.divHeight - 180 ) +"px"
+        };
+        var tableHeader_style = {
+            height: 56 +"px",
+            width: "100%"
+        };
+        return (
+            <div className="panel panel-default" style={_style}>
+                <div className="panel-heading">Gestion des Malades</div>
+                <div className="panel-body">
+                    <div className="btn-group" role="group" aria-label="modifications">
+                        <button className="btn btn-success" ><i className="fa fa-user-plus"></i> Ajouter un Patient</button>
+                        <button className="btn btn-danger" ><i className="fa fa-trash-o"></i> Supprimer un Patient</button>
+                    </div>
+                    <p></p>
+                    <div className="table-responsive" style={tableHeader_style}>
+                        <table className="table table-bordered table-hover table-condensed table-fixed">
+                            <thead>
+                            <tr>
+                                <th className="xsmall">#</th>
+                                <th className="medium">Nom</th>
+                                <th className="medium">Prenom</th>
+                                <th className="small">Sexe</th>
+                                <th className="small">Date de Naissance</th>
+                                <th className="large">Adresse</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div className="scroll" style={table_style}>
+                        <table className="table table-bordered table-hover table-condensed table-scrollable table-fixed">
+                            <tbody>
+                            {this.state.malades.map(function(col, j) {
+                                return <Patient key={j} instance={col}/>;
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+module.exports = MaladeContainer;

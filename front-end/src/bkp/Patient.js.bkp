@@ -1,0 +1,165 @@
+/**
+ * Created by MohamedAmine on 2/6/17.
+ */
+var React = require('react');
+var DateTime = require('react-datetime');
+//var moment = require('moment');
+import "./react-datetime.css";
+import "./table.css";
+require('moment/locale/fr');
+
+var Patient = createReactClass({
+    getInitialState: function() {
+        return {
+            edit : Array(6).fill(false),
+            click : Array(6).fill(false)
+        };
+    },
+    handleClick: function(i) {
+        var click = Array(6).fill(false);
+        click[i] = true;
+        this.setState({
+            click: click
+        });
+    },
+    handleMouseOver: function(i) {
+        var edit = Array(6).fill(false);
+        edit[i] = true;
+        this.setState({
+            edit: edit
+        });
+    },
+    handleMouseOut: function() {
+        this.setState({
+            edit: false
+        });
+    },
+    getEdit: function (i) {
+        var icon;
+        switch(i){
+            case 3:
+                icon = "fa fa-calendar text-center";
+                break;
+            default:
+                icon = "fa fa-pencil text-center";
+        }
+        if(this.state.edit[i])
+        {
+            return <i className={icon} aria-hidden="true"></i>;
+        }
+        return '';
+    },
+    setContent: function(i) {
+        var input;
+        var data ;
+        var size ;
+        var render;
+        switch(i){
+            case 0:
+                data = this.props.instance.firstName;
+                size = "medium";
+                input="text";
+                break;
+            case 1:
+                data = this.props.instance.lastName;
+                size = "medium";
+                input="text";
+                break;
+            case 2:
+                data = this.props.instance.gender;
+                size = "small";
+                input="select";
+                break;
+            case 3:
+                data = this.props.instance.birthDate;
+                size = "small";
+                input="date";
+                break;
+            case 4:
+                data = this.props.instance.address;
+                size = "large";
+                input="text";
+                break;
+            default:
+                alert("???");
+        }
+        if(!this.state.click[i]) {
+            return (
+                <td className={size} onClick={this.handleClick.bind(this,i)}
+                    onMouseOver={this.handleMouseOver.bind(this,i)}
+                    onMouseOut={this.handleMouseOut.bind(this,i)}>
+                    {data} {this.getEdit(i)}
+                </td>
+            );
+        }
+        if(input === "select") {
+            render = (
+                <td className={size} >
+                  <select className="form-control"
+                          value={data}
+                          onChange={this.handleSelect.bind(this,i)}>
+                    <option>M</option>
+                    <option>F</option>
+                  </select>
+                </td>
+            );
+        } else if (input === "date") {
+            render = (
+                <td className={size} >
+                  <DateTime
+                      viewMode="years"
+                      input={false}
+                      closeOnSelect={true}
+                      timeFormat="dd/MM/YYYY"
+                      defaultText={data+""}
+                      onChange={this.handleDate}
+                  />
+                </td>
+            );
+        } else {
+            render = (
+                <td className={size} >
+                  <input onKeyPress={this.handleKeyPress.bind(this,i)}
+                         className="form-control"
+                         type="text" defaultValue={data+""}/>
+                </td>
+            );
+        }
+        return render;
+    },
+    handleDate: function(date) {
+        var myDate = date.format("DD/MM/YYYY");
+        alert(myDate);
+    },
+    handleSelect: function (i,e) {
+        var click = Array(6).fill(false);
+        this.setState({
+            click: click
+        });
+    },
+    handleKeyPress: function(i,e) {
+        if(e.key === "Enter")
+        {
+            var click = Array(6).fill(false);
+            this.setState({
+                click: click
+            });
+        }
+        return true;
+    },
+    render: function() {
+        let patient = this.props.instance;
+        return (
+            <tr>
+              <th className="xsmall" scope="row">{patient.id}</th>
+                {this.setContent(0)}
+                {this.setContent(1)}
+                {this.setContent(2)}
+                {this.setContent(3)}
+                {this.setContent(4)}
+            </tr>
+        );
+    }
+});
+
+module.exports = Patient;

@@ -1,0 +1,205 @@
+/**
+ * Created by MohamedAmine on 2/6/17.
+ */
+var React = require('react');
+var Patient = require('./Patient');
+var axios = require('axios');
+var ReactBsTable  = require('react-bootstrap-table');
+var BootstrapTable = ReactBsTable.BootstrapTable;
+var TableHeaderColumn = ReactBsTable.TableHeaderColumn;
+
+var Main = createReactClass({
+        getInitialState: function() {
+            return {
+                malades: []
+            };
+        },
+    componentDidMount: function() {
+            var _this = this;
+            this.serverRequest = axios.get("http://localhost/app1/public/listMalade")
+            .then(function (result) {
+            const malades = result.data.map(function(mal,index,array) {
+                    return {
+                        id: mal.id,
+                        firstName: mal.nom,
+                        lastName: mal.prenom,
+                        gender: mal.sexe,
+                        address: mal.adresse,
+                        birthDate: mal.date_naissance,
+                    };
+                });
+            console.log(malades);
+            _this.setState({ malades: malades });
+          })
+            .catch(function(error){
+                  _this.setState({
+                    malades: [
+                      {
+                          id: 1,
+                          firstName: "Mark",
+                          lastName: "Otto",
+                          gender: "M",
+                          address: "lot chefchaouni, centre de santé palmier, ain sebaa casablanca",
+                          birthDate: "23/3/1970"
+                      },
+                      {
+                          id: 2,
+                          firstName: "Jacob",
+                          lastName: "Thornton",
+                          gender: "M",
+                          address: "22, rue farah, imm h33, agdal, rabat",
+                          birthDate: "14/4/1999"
+                      },
+                      {
+                          id: 3,
+                          firstName: "bo3o",
+                          lastName: "the Bird",
+                          gender: "F",
+                          address: "2, avenue 2 mars, casablanca",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 4,
+                          firstName: "dunkey",
+                          lastName: "buro",
+                          gender: "F",
+                          address: "adresse 1",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 5,
+                          firstName: "snoopy",
+                          lastName: "appli",
+                          gender: "F",
+                          address: "adresse 2",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 6,
+                          firstName: "migalo",
+                          lastName: "itop",
+                          gender: "F",
+                          address: "adresse 3",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 7,
+                          firstName: "sanfour",
+                          lastName: "ghadbane",
+                          gender: "F",
+                          address: "adresse 4",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 8,
+                          firstName: "bajghout",
+                          lastName: "kbir",
+                          gender: "F",
+                          address: "adresse 5",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 9,
+                          firstName: "salgout",
+                          lastName: "salut",
+                          gender: "F",
+                          address: "adresse 6",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 10,
+                          firstName: "zri9a",
+                          lastName: "popo",
+                          gender: "F",
+                          address: "adresse 7",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 11,
+                          firstName: "kinkina",
+                          lastName: "lolo",
+                          gender: "F",
+                          address: "adresse 7",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 12,
+                          firstName: "louis",
+                          lastName: "khout",
+                          gender: "F",
+                          address: "adresse 7",
+                          birthDate: "1/5/1981"
+                      },
+                      {
+                          id: 13,
+                          firstName: "driyef",
+                          lastName: "7mida",
+                          gender: "F",
+                          address: "adresse 7",
+                          birthDate: "1/5/1981"
+                      },
+                    ]
+                  });
+            });
+    },
+    handleSelect(eventKey) {
+        this.setState({
+            activePage: eventKey
+        });
+    },
+    onBeforeSaveCell: function(row, cellName, cellValue) {
+      var malade = this.state.malades[row.id -1];
+      alert("old "+cellName+": "+malade[cellName]+ " >> new "+cellName+" :"+cellValue);
+      return true;
+    },
+    onAfterSaveCell: function(row, cellName, cellValue) {
+
+    },
+    onAfterInsertRow: function(row) {},
+    render: function() {
+      const options = {
+          afterInsertRow: this.onAfterInsertRow,   // A hook for after insert rows
+          page: 1,  // which page you want to show as default
+          sizePerPage: 7,  // which size per page you want to locate as default
+          pageStartIndex: 1, // where to start counting the pages
+          paginationSize: 3,  // the pagination bar size.
+          prePage: 'Prev', // Previous page button text
+          nextPage: 'Next', // Next page button text
+          firstPage: 'First', // First page button text
+          lastPage: 'Last', // Last page button text
+          paginationShowsTotal: this.renderShowsTotal  // Accept bool or function
+          // hideSizePerPage: true > You can hide the dropdown for sizePerPage
+        };
+         const selectRow = {
+          mode: 'radio',  // multi select
+          clickToSelect: true
+        };
+        const cellEdit = {
+          mode: 'dbclick', // click cell to edit
+          blurToSave: true,
+          beforeSaveCell: this.onBeforeSaveCell, // a hook for before saving cell
+          afterSaveCell: this.onAfterSaveCell  // a hook for after saving cell
+        };
+        return (
+            <div className="panel panel-default">
+                <div className="panel-heading">Gestion des Malades</div>
+                <div className="panel-body">
+                  <div className="btn-group" role="group" aria-label="modifications">
+                    <button className="btn btn-success" ><i className="fa fa-user-plus"></i> Ajouter un Patient</button>
+                    <button className="btn btn-danger" ><i className="fa fa-user-plus"></i> Supprimer un Patient</button>
+                  </div>
+                    <BootstrapTable data={this.state.malades} striped={true} hover={true} pagination={true} condensed={true} bordered={true} cellEdit={ cellEdit } selectRow={ selectRow }
+        insertRow={false} deleteRow={false} search={true} searchPlaceholder='input something...'  columnFilter={false} options={options}>
+                      <TableHeaderColumn isKey dataField='id'>#</TableHeaderColumn>
+                      <TableHeaderColumn dataField='firstName' editable={ true }>Prenom</TableHeaderColumn>
+                      <TableHeaderColumn dataField='lastName' editable={ true }>Nom</TableHeaderColumn>
+                        <TableHeaderColumn dataField='gender' editable={ true }>Sexe</TableHeaderColumn>
+                        <TableHeaderColumn dataField='address' editable={ true }>Adresse</TableHeaderColumn>
+                        <TableHeaderColumn dataField='birthDate' editable={ true }>Date de Naissance</TableHeaderColumn>
+                    </BootstrapTable>
+                </div>
+            </div>
+        );
+    }
+});
+module.exports = Main;

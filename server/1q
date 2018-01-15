@@ -1,0 +1,4 @@
+LOAD DATA INFILE '/Users/MohamedAmine/Documents/db\ cabinet/malade.csv' INTO TABLE malades CHARACTER SET 'utf8' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS (id,nom,prenom,sexe,cin,adresse,@date_naissance,@created_at) SET date_naissance = STR_TO_DATE(@date_naissance,'%d/%m/%Y'),created_at = STR_TO_DATE(@created_at, '%d:%m:%Y %H:%i:%s');
+
+
+LOAD DATA INFILE '/Users/MohamedAmine/Documents/db\ cabinet/Consultation.csv' INTO TABLE consultations CHARACTER SET 'utf8' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS (id,@Date_consultation, malade_id, ordonnance, diag_list, symp_list, exam_list) SET created_at = STR_TO_DATE(@date_naissance,'%d/%m/%Y %H:%i:%s');

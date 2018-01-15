@@ -1,0 +1,13 @@
+﻿LOAD DATA INFILE '/Users/h.hargal/Documents/db\ cabinet/malade.csv' INTO TABLE malades FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS (id,nom,prenom,sexe,cin,adresse,@date_naissance,@created_at) SET date_naissance = STR_TO_DATE(@date_naissance,'%d/%m/%Y');
+
+
+
+LOAD DATA INFILE '/Users/h.hargal/Documents/db\ cabinet/Consultation.csv' INTO TABLE consultations FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 ROWS (id,malade_id@created_at) SET date_naissance = STR_TO_DATE(@date_naissance,'%d/%m/%Y');
+
+
+
+LOAD DATA INFILE '/Users/h.hargal/Documents/db\ cabinet/malade.csv' INTO TA\
+BLE malades FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n' I\
+GNORE 1 ROWS (id,nom,prenom,sexe,cin,adresse,@date_naissance,@created_at) SET d\
+ate_naissance = STR_TO_DATE(@date_naissance,'%d/%m/%Y');
+cfƒƒƒƒççç

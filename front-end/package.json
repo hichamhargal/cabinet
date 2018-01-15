@@ -1,0 +1,30 @@
+{
+  "name": "app-cabinet",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "react-scripts": "0.8.5"
+  },
+  "dependencies": {
+    "axios": "^0.17.1",
+    "bootstrap-datetimepicker": "0.0.7",
+    "moment": "^2.17.1",
+    "react": "^15.4.2",
+    "react-bootstrap": "^0.30.7",
+    "react-bootstrap-modal": "^3.0.1",
+    "react-bootstrap-table": "^2.11.2",
+    "react-bootstrap-typeahead": "^2.0.0-alpha.3",
+    "react-datetime": "^2.8.6",
+    "react-dom": "^15.4.2",
+    "react-dom-factories": "^1.0.1",
+    "react-sidenav": "^1.0.4",
+    "react-toastr": "^2.8.2",
+    "react-tooltip": "^3.2.7"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

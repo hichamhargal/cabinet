@@ -1,0 +1,34 @@
+th.bigSpace {
+  width: 60% ;
+}
+th.largeSpace {
+  width: 40% ;
+}
+th.smallSpace {
+  width: 10% ;
+}
+th.xsmallSpace {
+  width: 8% ;
+}
+th.mediumSpace {
+  width: 20% ;
+}
+td.bigSpace {
+  width: 60% ;
+}
+td.largeSpace {
+  width: 40% ;
+}
+td.smallSpace {
+  width: 10% ;
+}
+td.xsmallSpace {
+  width: 8% ;
+}
+td.mediumSpace {
+  width: 20% ;
+}
+.table-scrollable { margin: 0; padding: 0; }
+.table-fixed {
+    table-layout: fixed;
+  }
